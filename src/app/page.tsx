@@ -1,6 +1,10 @@
 "use client"
 
+import { client } from "@/lib/client";
+import { useMutation } from "@tanstack/react-query";
+import { create } from "domain";
 import { nanoid } from "nanoid";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const ANIMALS = ["wolf", "hawk", "bear", "lion", "elephant"]
@@ -14,6 +18,7 @@ const generateUsername = () => {
 export default function Home() {
 
   const [username, setUsername] = useState("Username")
+  const router = useRouter()
 
   useEffect(() => {
     const main = () => {
@@ -31,6 +36,16 @@ export default function Home() {
 
     main()
   }, [])
+
+  const {mutate: createRoom} = useMutation({
+    mutationFn: async () => {
+      const res = await client.room.create.post()
+
+      if(res.status === 200){
+        router.push(`/room/${res.data?.roomId}`)
+      }
+    }
+  })
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4">
@@ -53,7 +68,8 @@ export default function Home() {
                 </div>
               </div>
             </div>
-            <button className="w-full bg-zinc-100 text-black p-3 text-sm font-bold hover:bg-zinc-50 hover:text-black transition-colors mt-2 cursor-pointer disabled:opacity-50">
+            <button className="w-full bg-zinc-100 text-black p-3 text-sm font-bold hover:bg-zinc-50 hover:text-black transition-colors mt-2 cursor-pointer disabled:opacity-50"
+            onClick={() => createRoom()}>
               CREATE SECURE ROOM
             </button>
           </div>
